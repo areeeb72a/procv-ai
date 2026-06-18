@@ -491,17 +491,6 @@
     .step-label { display: none; }
   }
 
-  /* API KEY BAR */
-  .api-bar { background:#FFF8E7; border-bottom:1px solid #F0D98A; padding:10px 40px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-  .api-bar label { font-size:0.78rem; font-weight:600; color:var(--navy); white-space:nowrap; }
-  .api-bar input { flex:1; min-width:200px; max-width:380px; border:1.5px solid #E0C87A; border-radius:6px; padding:7px 12px; font-size:0.82rem; font-family:monospace; background:var(--white); outline:none; }
-  .api-bar input:focus { border-color:var(--gold); }
-  .api-bar-hint { font-size:0.73rem; color:var(--muted); }
-  .api-bar-hint a { color:var(--gold); text-decoration:none; }
-  #apiStatus { font-size:0.75rem; font-weight:600; }
-  #apiStatus.ok { color:var(--success); }
-  #apiStatus.err { color:var(--error); }
-
   /* MODE TABS */
   .mode-tabs { max-width:860px; margin:-32px auto 0; padding:0 20px; position:relative; z-index:20; display:flex; }
   .mode-tab { flex:1; padding:13px 20px; text-align:center; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); border:none; cursor:pointer; color:rgba(255,255,255,0.75); font-family:'Inter',sans-serif; font-size:0.88rem; font-weight:500; transition:all 0.2s; }
@@ -535,14 +524,6 @@
   <div class="logo">ProCV <span>AI</span></div>
   <div class="header-badge">✦ AI Powered</div>
 </header>
-
-<!-- API KEY BAR -->
-<div class="api-bar">
-  <label for="apiKeyInput">🔑 API Key:</label>
-  <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." oninput="saveKey()" />
-  <span id="apiStatus"></span>
-  <span class="api-bar-hint">Get free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> — stays in browser only</span>
-</div>
 
 <section class="hero">
   <div class="hero-eyebrow">Career-Winning Documents</div>
@@ -814,18 +795,6 @@
 
 <script>
 
-// ── API KEY ──
-function saveKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (key) { sessionStorage.setItem('procv_key', key); document.getElementById('apiStatus').textContent = '✓ Key saved'; document.getElementById('apiStatus').className = 'ok'; }
-  else { document.getElementById('apiStatus').textContent = ''; }
-}
-function getKey() { return document.getElementById('apiKeyInput').value.trim() || sessionStorage.getItem('procv_key') || ''; }
-window.onload = () => {
-  const saved = sessionStorage.getItem('procv_key');
-  if (saved) { document.getElementById('apiKeyInput').value = saved; document.getElementById('apiStatus').textContent = '✓ Key saved'; document.getElementById('apiStatus').className = 'ok'; }
-};
-
 // ── STATE ──
 let cvType = 'ats';
 let skills = [];
@@ -876,8 +845,6 @@ function processFile(file) {
 
 // ── ANALYZE UPLOADED CV ──
 async function analyzeUploadedCV() {
-  const key = getKey();
-  if (!key) { alert('Please enter your Anthropic API key in the yellow bar at the top.'); return; }
   if (!uploadedFileData) { alert('Please upload a CV file first.'); return; }
   const action = document.getElementById('uploadAction').value;
   const jobDesc = document.getElementById('uploadJobDesc').value;
@@ -1019,8 +986,6 @@ function removeExp(id) {
 
 // ── GENERATE ──
 async function generateCV() {
-  const key = getKey();
-  if (!key) { alert("Please enter your Anthropic API key in the yellow bar at the top of the page.\n\nGet it free at: console.anthropic.com"); return; }
   const name = document.getElementById('fullName').value.trim();
   const title = document.getElementById('jobTitle').value.trim();
   if (!name || !title) {
@@ -1141,7 +1106,7 @@ etc.`;
   } catch (err) {
     document.getElementById('generating-view').style.display = 'none';
     document.getElementById('step4').classList.add('active');
-    alert('Error: ' + err.message + '\n\nMake sure your Anthropic API key is configured.');
+    alert('Error: ' + err.message);
   }
 }
 
