@@ -516,6 +516,20 @@
   .upload-options textarea { min-height:80px; resize:vertical; }
   #uploadMode { display:none; }
   #uploadMode.active { display:block; }
+
+  .cv-output h1{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--navy);margin-bottom:4px}
+  .cv-output h2{font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:700;margin:20px 0 8px;padding-bottom:5px;border-bottom:1.5px solid var(--gold)}
+  .cv-output h3{font-size:0.95rem;font-weight:700;color:var(--navy);margin:12px 0 2px}
+  .cv-output strong{font-weight:600;color:var(--navy)}
+  .cv-output em{font-style:italic;color:var(--muted)}
+  .cv-output ul{padding-left:18px;margin:6px 0}
+  .cv-output li{margin-bottom:4px}
+  .cv-output hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+  .cv-output p{margin-bottom:8px}
+  .cv-output table{width:100%;border-collapse:collapse;margin:10px 0;font-size:0.82rem}
+  .cv-output td,.cv-output th{border:1px solid var(--border);padding:6px 10px;text-align:left}
+  .cv-output th{background:#F3F4F6;font-weight:600}
+
 </style>
 </head>
 <body>
@@ -785,7 +799,7 @@
     </div>
     <div class="cv-output" id="cvOutput"></div>
     <div class="pricing-strip">
-      Need a <strong>formatted Word/PDF file</strong>? Contact us on WhatsApp: <strong>+92-XXX-XXXXXXX</strong> — Formatting from <strong>AED 25 / PKR 2000</strong>
+      Need a <strong>formatted Word/PDF file?</strong> WhatsApp: <strong>🇵🇰 +92-334-1331972</strong> &nbsp;|&nbsp; <strong>🇦🇪 +971-54-5271033</strong> — From <strong>AED 25 / PKR 2,000</strong>
     </div>
   </div>
 
@@ -887,7 +901,26 @@ async function analyzeUploadedCV() {
     const text = data.content?.map(c=>c.text||'').join('') || 'Error.';
     document.getElementById('generating-view').style.display = 'none';
     document.getElementById('result-view').style.display = 'block';
-    document.getElementById('cvOutput').innerText = text;
+    
+function mdToHtml(md){
+  let h = md
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/═+\s*(.+?)\s*═+/g,'<h2>$1</h2>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/^---+$/gm,'<hr>')
+    .replace(/^- (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g,'<ul>$1</ul>')
+    .replace(/^\| (.+) \|$/gm,(m,p)=>'<tr>'+p.split(' | ').map(c=>'<td>'+c+'</td>').join('')+'</tr>')
+    .replace(/^\|[-| ]+\|$/gm,'');
+  h = h.split('\n\n').map(p=>p.trim()).filter(Boolean).map(p=>p.startsWith('<')?p:'<p>'+p+'</p>').join('\n');
+  return h;
+}
+
+  document.getElementById('cvOutput').innerHTML = mdToHtml(text);
   } catch(err) {
     document.getElementById('generating-view').style.display = 'none';
     document.getElementById('uploadMode').classList.add('active');
