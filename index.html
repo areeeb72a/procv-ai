@@ -530,6 +530,74 @@
   .cv-output td,.cv-output th{border:1px solid var(--border);padding:6px 10px;text-align:left}
   .cv-output th{background:#F3F4F6;font-weight:600}
 
+
+  /* WATERMARK */
+  .cv-output-wrap { position: relative; }
+  .watermark-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 10; overflow: hidden;
+    border-radius: 10px;
+  }
+  .wm-text {
+    position: absolute; font-size: 2.2rem; font-weight: 900;
+    color: rgba(201,168,76,0.18); transform: rotate(-35deg);
+    white-space: nowrap; user-select: none; letter-spacing: 2px;
+    font-family: 'Playfair Display', serif;
+  }
+  /* UNLOCK BOX */
+  .unlock-box {
+    background: linear-gradient(135deg, #0D1B2A, #1A2E45);
+    border-radius: 12px; padding: 22px 28px; margin-top: 16px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .unlock-left { flex: 1; min-width: 200px; }
+  .unlock-title { color: #C9A84C; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+  .unlock-sub { color: rgba(255,255,255,0.65); font-size: 0.8rem; line-height: 1.5; }
+  .unlock-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .unlock-input {
+    border: 1.5px solid #C9A84C; border-radius: 8px;
+    padding: 9px 14px; font-size: 0.85rem; background: rgba(255,255,255,0.08);
+    color: #fff; outline: none; width: 160px; font-family: 'Inter', sans-serif;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .unlock-input::placeholder { color: rgba(255,255,255,0.35); letter-spacing: 1px; }
+  .unlock-input:focus { border-color: #E8C96D; background: rgba(255,255,255,0.12); }
+  .btn-unlock {
+    background: #C9A84C; color: #0D1B2A; border: none;
+    border-radius: 8px; padding: 9px 20px; font-size: 0.85rem;
+    font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-unlock:hover { background: #E8C96D; }
+  .wa-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #25D366; color: #fff; border: none; border-radius: 8px;
+    padding: 9px 18px; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: none;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .wa-btn:hover { background: #20BA5A; transform: translateY(-1px); }
+  /* CLEAN DOWNLOAD BTN */
+  .btn-clean-dl {
+    background: var(--gold); color: var(--navy); border: none;
+    border-radius: 8px; padding: 10px 22px; font-size: 0.88rem;
+    font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.2s; display: none;
+  }
+  .btn-clean-dl:hover { background: var(--gold-light); transform: translateY(-1px); }
+  /* PRINT STYLES */
+  @media print {
+    header, .hero, .mode-tabs, .progress-wrap, .result-header,
+    .unlock-box, .copy-toast, #generating-view { display: none !important; }
+    .main { margin: 0; padding: 0; max-width: 100%; }
+    #result-view { display: block !important; box-shadow: none; padding: 0; }
+    .cv-output { max-height: none; border: none; padding: 20px; font-size: 11pt; line-height: 1.7; }
+    .cv-output h1 { font-size: 18pt; }
+    .cv-output h2 { font-size: 9pt; }
+    .cv-output h3 { font-size: 12pt; }
+    .watermark-overlay { display: var(--wm-print, flex) !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -797,9 +865,29 @@
         <button class="btn btn-primary" onclick="startOver()">+ New CV</button>
       </div>
     </div>
-    <div class="cv-output" id="cvOutput"></div>
+    <div class="cv-output-wrap" id="cvOutputWrap">
+      <div class="cv-output" id="cvOutput"></div>
+      <div class="watermark-overlay" id="wmOverlay"></div>
+    </div>
     <div class="pricing-strip">
-      Need a <strong>formatted Word/PDF file?</strong> WhatsApp: <strong>🇵🇰 +92-334-1331972</strong> &nbsp;|&nbsp; <strong>🇦🇪 +971-54-5271033</strong> — From <strong>AED 25 / PKR 2,000</strong>
+      <div class="unlock-box">
+      <div class="unlock-left">
+        <div class="unlock-title">🔒 Clean PDF chahiye? Unlock karo!</div>
+        <div class="unlock-sub">
+          Pay karo aur WhatsApp pe unlock code lो — watermark-free PDF download hogi<br>
+          💰 <strong style="color:#C9A84C">PKR 500</strong> &nbsp;|&nbsp; <strong style="color:#C9A84C">AED 10</strong>
+        </div>
+      </div>
+      <div class="unlock-right">
+        <a class="wa-btn" id="waBtn" href="#" target="_blank">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L0 24l6.335-1.507A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.369l-.36-.214-3.728.887.925-3.618-.235-.372A9.818 9.818 0 1112 21.818z"/></svg>
+          WhatsApp karo
+        </a>
+        <input class="unlock-input" id="unlockCode" placeholder="ENTER CODE" maxlength="8">
+        <button class="btn-unlock" onclick="tryUnlock()">🔓 Unlock</button>
+      </div>
+    </div>
+    <button class="btn-clean-dl" id="cleanDlBtn" onclick="downloadClean()">⬇️ Download Clean PDF</button>
     </div>
   </div>
 
@@ -921,6 +1009,9 @@ function mdToHtml(md){
 }
 
   document.getElementById('cvOutput').innerHTML = mdToHtml(text);
+  cvRawText = text;
+  buildWatermark();
+  setWALink();
   } catch(err) {
     document.getElementById('generating-view').style.display = 'none';
     document.getElementById('uploadMode').classList.add('active');
@@ -1141,6 +1232,102 @@ etc.`;
     document.getElementById('step4').classList.add('active');
     alert('Error: ' + err.message);
   }
+}
+
+
+// ── WATERMARK & UNLOCK SYSTEM ──
+// Codes verified via API (one-time use)
+
+let cvRawText = '';
+let isUnlocked = false;
+
+function buildWatermark() {
+  const overlay = document.getElementById('wmOverlay');
+  if (!overlay) return;
+  overlay.innerHTML = '';
+  const texts = ['RIZWAN\'S AI AGENCY', 'SAMPLE ONLY', 'PROCV.AI'];
+  let y = -60;
+  for (let row = 0; row < 12; row++) {
+    let x = -100;
+    for (let col = 0; col < 5; col++) {
+      const el = document.createElement('div');
+      el.className = 'wm-text';
+      el.style.top = y + 'px';
+      el.style.left = x + 'px';
+      el.textContent = texts[row % texts.length];
+      overlay.appendChild(el);
+      x += 280;
+    }
+    y += 120;
+  }
+  overlay.style.display = 'flex';
+}
+
+function setWALink() {
+  const text = encodeURIComponent(
+    'Assalam o Alaikum! Me ne ProCV AI se apni CV banai hai. Clean PDF chahiye.\n\nKindly payment details bhejein:\n🇵🇰 PKR 500 | 🇦🇪 AED 10'
+  );
+  const pkBtn = document.getElementById('waBtn');
+  if (pkBtn) pkBtn.href = 'https://wa.me/923341331972?text=' + text;
+}
+
+async function tryUnlock() {
+  const inp = document.getElementById('unlockCode');
+  const code = inp.value.trim().toUpperCase();
+  if (!code) return;
+  const btn = document.querySelector('.btn-unlock');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify', code })
+    });
+    const data = await res.json();
+    if (data.valid) {
+      isUnlocked = true;
+      document.getElementById('wmOverlay').style.display = 'none';
+      document.getElementById('wmOverlay').innerHTML = '';
+      document.getElementById('cleanDlBtn').style.display = 'inline-block';
+      inp.style.borderColor = '#10B981';
+      inp.value = '✓ UNLOCKED!';
+      showToast('✓ Unlocked! Ab clean PDF download karo');
+    } else {
+      inp.style.borderColor = '#EF4444';
+      inp.value = '';
+      inp.placeholder = '❌ ' + (data.error || 'Invalid code');
+      setTimeout(() => {
+        inp.style.borderColor = '#C9A84C';
+        inp.placeholder = 'ENTER CODE';
+      }, 2500);
+    }
+  } catch(e) {
+    showToast('❌ Error: ' + e.message);
+  }
+  btn.textContent = '🔓 Unlock';
+  btn.disabled = false;
+}
+
+function downloadClean() {
+  if (!isUnlocked) return;
+  document.getElementById('wmOverlay').style.display = 'none';
+  window.print();
+  setTimeout(() => {
+    if (!isUnlocked) document.getElementById('wmOverlay').style.display = 'flex';
+  }, 1000);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('copyToast');
+  if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+}
+
+// Override copyCV to store raw text
+const _origCopyCV = typeof copyCV !== 'undefined' ? copyCV : null;
+function copyCV() {
+  navigator.clipboard.writeText(cvRawText || document.getElementById('cvOutput').innerText);
+  showToast('✓ Copied to clipboard!');
 }
 
 // ── COPY ──

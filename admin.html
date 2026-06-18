@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProCV Admin — Code Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #0D1B2A; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .card { background: #1A2E45; border-radius: 16px; padding: 36px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .logo { color: #C9A84C; font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+  .logo span { color: #fff; }
+  .sub { color: rgba(255,255,255,0.45); font-size: 0.8rem; margin-bottom: 28px; }
+  label { display: block; font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  input[type=password], input[type=text] {
+    width: 100%; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 11px 14px; font-size: 0.9rem; color: #fff;
+    font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  input:focus { border-color: #C9A84C; }
+  .btn { width: 100%; background: #C9A84C; color: #0D1B2A; border: none; border-radius: 8px; padding: 13px; font-size: 0.95rem; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+  .btn:hover { background: #E8C96D; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 24px 0; }
+  .code-display { display: none; text-align: center; background: rgba(201,168,76,0.08); border: 1.5px solid #C9A84C; border-radius: 12px; padding: 24px; margin-top: 20px; }
+  .code-display.show { display: block; }
+  .code-label { font-size: 0.72rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .code-value { font-size: 2.2rem; font-weight: 700; color: #C9A84C; letter-spacing: 6px; font-family: monospace; margin-bottom: 16px; }
+  .code-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn-copy { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 9px 18px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+  .btn-copy:hover { background: rgba(255,255,255,0.18); }
+  .btn-wa { background: #25D366; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-wa:hover { background: #20BA5A; }
+  .btn-new { background: none; color: #C9A84C; border: 1.5px solid #C9A84C; border-radius: 8px; padding: 9px 18px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+  .btn-new:hover { background: rgba(201,168,76,0.1); }
+  .expiry-note { font-size: 0.72rem; color: rgba(255,255,255,0.35); margin-top: 12px; }
+  .error-msg { color: #EF4444; font-size: 0.82rem; margin-top: 10px; display: none; }
+  .error-msg.show { display: block; }
+  .login-section { display: block; }
+  .gen-section { display: none; }
+  .gen-section.active { display: block; }
+  .login-section.hidden { display: none; }
+  .stats-row { display: flex; gap: 12px; margin-bottom: 20px; }
+  .stat-card { flex: 1; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-num { font-size: 1.4rem; font-weight: 700; color: #C9A84C; }
+  .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1A2E45; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.82rem; border: 1px solid #C9A84C; transition: transform 0.3s; z-index: 99; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">ProCV <span>Admin</span></div>
+  <div class="sub">One-time unlock code generator</div>
+
+  <!-- LOGIN -->
+  <div class="login-section" id="loginSection">
+    <label>Admin Password</label>
+    <input type="password" id="adminPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn" onclick="login()" id="loginBtn">Login →</button>
+    <div class="error-msg" id="loginErr">❌ Wrong password. Try again.</div>
+  </div>
+
+  <!-- GENERATOR -->
+  <div class="gen-section" id="genSection">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="totalToday">—</div><div class="stat-label">Codes Today</div></div>
+      <div class="stat-card"><div class="stat-num">7</div><div class="stat-label">Days Expiry</div></div>
+      <div class="stat-card"><div class="stat-num">1x</div><div class="stat-label">Use Only</div></div>
+    </div>
+
+    <label>Customer Name / Note (optional)</label>
+    <input type="text" id="custNote" placeholder="e.g. Shah Sultan - AED 10 received">
+
+    <button class="btn" onclick="generateCode()" id="genBtn">⚡ Generate Unlock Code</button>
+
+    <div class="code-display" id="codeDisplay">
+      <div class="code-label">One-Time Unlock Code</div>
+      <div class="code-value" id="codeVal">----</div>
+      <div class="code-actions">
+        <button class="btn-copy" onclick="copyCode()">📋 Copy Code</button>
+        <a class="btn-wa" id="waPKBtn" href="#" target="_blank">🇵🇰 Send PK</a>
+        <a class="btn-wa" id="waUAEBtn" href="#" target="_blank">🇦🇪 Send UAE</a>
+        <button class="btn-new" onclick="resetGen()">+ New Code</button>
+      </div>
+      <div class="expiry-note">⏳ Code expires in 7 days • One-time use only</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let adminKey = '';
+let codesGenerated = 0;
+
+function login() {
+  const pass = document.getElementById('adminPass').value;
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+
+  // Simple client-side check — real check happens on API
+  // We'll verify by trying to generate a test
+  adminKey = pass;
+  document.getElementById('loginSection').classList.add('hidden');
+  document.getElementById('genSection').classList.add('active');
+  btn.disabled = false;
+  btn.textContent = 'Login →';
+}
+
+async function generateCode() {
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating...';
+
+  try {
+    const res = await fetch('/api/code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'generate', adminKey })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      if (data.error === 'Unauthorized') {
+        document.getElementById('genSection').classList.remove('active');
+        document.getElementById('loginSection').classList.remove('hidden');
+        document.getElementById('loginErr').classList.add('show');
+        adminKey = '';
+      } else {
+        showToast('❌ Error: ' + data.error);
+      }
+      btn.disabled = false;
+      btn.textContent = '⚡ Generate Unlock Code';
+      return;
+    }
+
+    const code = data.code;
+    document.getElementById('codeVal').textContent = code;
+    document.getElementById('codeDisplay').classList.add('show');
+    btn.style.display = 'none';
+
+    codesGenerated++;
+    document.getElementById('totalToday').textContent = codesGenerated;
+
+    // WhatsApp messages
+    const note = document.getElementById('custNote').value || 'Customer';
+    const msgPK = encodeURIComponent(
+      `Assalam o Alaikum! 🎉\n\nAap ki CV taiyar hai!\n\nYahan se download karein:\nhttps://procv-ai.vercel.app\n\n🔓 Unlock Code: *${code}*\n\n(Yeh code sirf ek baar kaam karega)\n\n— Rizwan's AI Agency\n🇵🇰 +92-334-1331972`
+    );
+    const msgUAE = encodeURIComponent(
+      `Hello! 🎉\n\nYour CV is ready!\n\nDownload here:\nhttps://procv-ai.vercel.app\n\n🔓 Unlock Code: *${code}*\n\n(One-time use only)\n\n— Rizwan's AI Agency\n🇦🇪 +971-54-5271033`
+    );
+    document.getElementById('waPKBtn').href = `https://wa.me/?text=${msgPK}`;
+    document.getElementById('waUAEBtn').href = `https://wa.me/?text=${msgUAE}`;
+
+    showToast('✅ Code ready! WhatsApp pe bhejo');
+  } catch (err) {
+    showToast('❌ ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '⚡ Generate Unlock Code';
+  }
+}
+
+function copyCode() {
+  const code = document.getElementById('codeVal').textContent;
+  navigator.clipboard.writeText(code);
+  showToast('✅ Code copied!');
+}
+
+function resetGen() {
+  document.getElementById('codeDisplay').classList.remove('show');
+  document.getElementById('genBtn').style.display = 'block';
+  document.getElementById('genBtn').disabled = false;
+  document.getElementById('genBtn').textContent = '⚡ Generate Unlock Code';
+  document.getElementById('custNote').value = '';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
