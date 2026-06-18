@@ -424,9 +424,8 @@
     font-size: 0.88rem;
     line-height: 1.8;
     color: var(--text);
-    white-space: pre-wrap;
     font-family: 'Inter', sans-serif;
-    max-height: 520px;
+    max-height: 560px;
     overflow-y: auto;
   }
   .cv-output h2 {
@@ -517,18 +516,22 @@
   #uploadMode { display:none; }
   #uploadMode.active { display:block; }
 
-  .cv-output h1{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--navy);margin-bottom:4px}
-  .cv-output h2{font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:700;margin:20px 0 8px;padding-bottom:5px;border-bottom:1.5px solid var(--gold)}
-  .cv-output h3{font-size:0.95rem;font-weight:700;color:var(--navy);margin:12px 0 2px}
-  .cv-output strong{font-weight:600;color:var(--navy)}
-  .cv-output em{font-style:italic;color:var(--muted)}
-  .cv-output ul{padding-left:18px;margin:6px 0}
-  .cv-output li{margin-bottom:4px}
-  .cv-output hr{border:none;border-top:1px solid var(--border);margin:14px 0}
-  .cv-output p{margin-bottom:8px}
-  .cv-output table{width:100%;border-collapse:collapse;margin:10px 0;font-size:0.82rem}
-  .cv-output td,.cv-output th{border:1px solid var(--border);padding:6px 10px;text-align:left}
-  .cv-output th{background:#F3F4F6;font-weight:600}
+  .cv-output{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:32px 36px;font-size:0.88rem;line-height:1.85;color:#1A1A2E;max-height:560px;overflow-y:auto;font-family:'Inter',sans-serif}
+  .cv-output h1{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:#0D1B2A;margin:0 0 6px;border-bottom:3px solid #C9A84C;padding-bottom:8px}
+  .cv-output h2{font-size:0.65rem;letter-spacing:3.5px;text-transform:uppercase;color:#C9A84C;font-weight:700;margin:22px 0 6px;padding-bottom:5px;border-bottom:1.5px solid #C9A84C}
+  .cv-output h3{font-size:0.95rem;font-weight:700;color:#0D1B2A;margin:14px 0 2px}
+  .cv-output strong{font-weight:700;color:#0D1B2A}
+  .cv-output em{font-style:italic;color:#6B7280}
+  .cv-output ul{padding-left:20px;margin:6px 0 10px}
+  .cv-output li{margin-bottom:5px;color:#333}
+  .cv-output li::marker{color:#C9A84C}
+  .cv-output hr{border:none;border-top:1.5px solid #E5E7EB;margin:16px 0}
+  .cv-output p{margin-bottom:9px;color:#333}
+  .cv-output blockquote{border-left:3px solid #C9A84C;margin:10px 0;padding:8px 16px;background:#FFF8E7;border-radius:0 6px 6px 0;color:#555;font-style:italic}
+  .cv-output table{width:100%;border-collapse:collapse;margin:12px 0;font-size:0.82rem}
+  .cv-output td,.cv-output th{border:1px solid #E5E7EB;padding:7px 12px;text-align:left}
+  .cv-output th{background:#F8F9FA;font-weight:700;color:#0D1B2A;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
+  .cv-output tr:nth-child(even) td{background:#FAFAFA}
 
 
   /* WATERMARK */
@@ -951,11 +954,178 @@ async function analyzeUploadedCV() {
   const action = document.getElementById('uploadAction').value;
   const jobDesc = document.getElementById('uploadJobDesc').value;
   const prompts = {
-    improve: 'Analyze this CV and rewrite it as a polished ATS-optimized professional CV. Use power verbs, quantify achievements, restructure for maximum impact. Add clear section headers.',
-    europass: 'Analyze this CV and rewrite it in the official Europass format used for European job applications.',
-    review: 'Review this CV thoroughly. Provide: 1) Score out of 10, 2) Key strengths, 3) Critical weaknesses, 4) Specific improvements, 5) ATS compatibility notes.',
-    cover: 'Based on this CV, write a compelling 3-paragraph professional cover letter.',
-    linkedin: 'Based on this CV, write an optimized LinkedIn profile: Headline, About section (3 paragraphs), and reformatted experience bullets.'
+    improve: `You are a senior CV writer. COMPLETELY REWRITE this CV using this EXACT Markdown format:
+
+# [Full Name]
+**[Job Title]**
+Email: [email] | Phone: [phone] | Location: [location]
+
+---
+
+## PROFESSIONAL SUMMARY
+[3-4 powerful sentences with action words and measurable impact]
+
+---
+
+## PROFESSIONAL EXPERIENCE
+
+### [Job Title]
+**[Company]** | [Location] | *[Start Date] – [End Date]*
+
+- [Power verb + quantified achievement]
+- [Power verb + quantified achievement]
+- [Power verb + achievement]
+
+---
+
+## EDUCATION
+**[Degree]** — [Institution] | [Year]
+
+---
+
+## SKILLS
+**Technical:** [skill, skill, skill]
+**Languages:** [lang (level), lang (level)]
+
+---
+
+*References available upon request*
+
+RULES: Remove CNIC/DOB/Religion/Gender. Use action verbs. Quantify. Start with # [Name].`,
+
+    europass: `Rewrite this CV in official Europass format:
+
+# [Full Name]
+
+---
+
+## PERSONAL INFORMATION
+**Email:** [email] | **Phone:** [phone] | **Location:** [location] | **Nationality:** [nationality]
+
+---
+
+## WORK EXPERIENCE
+
+### [Job Title] | *[Dates]*
+**[Employer Name]** | [City, Country]
+
+- [Main responsibility or achievement]
+- [Achievement]
+
+---
+
+## EDUCATION AND TRAINING
+
+### [Qualification Title] | *[Year]*
+**[Institution]** | [City, Country]
+
+---
+
+## LANGUAGE SKILLS
+| Language | Listening | Reading | Spoken Interaction | Written |
+|----------|-----------|---------|-------------------|---------|
+| [Language] | [A2/B1/C1] | [level] | [level] | [level] |
+
+---
+
+## DIGITAL COMPETENCES
+[List tools, software, platforms]
+
+---
+
+## ADDITIONAL INFORMATION
+[Certifications, references, other]`,
+
+    review: `Review this CV as a senior HR Director. Output in this format:
+
+## CV REVIEW REPORT
+
+### Overall Score: [X]/10
+
+---
+
+### KEY STRENGTHS
+- [strength]
+- [strength]
+- [strength]
+
+---
+
+### CRITICAL ISSUES TO FIX
+- **[Issue]:** [How to fix it]
+- **[Issue]:** [How to fix it]
+
+---
+
+### ATS COMPATIBILITY: [X]/10
+- [finding]
+- [finding]
+
+---
+
+### TOP 3 PRIORITY IMPROVEMENTS
+1. [Specific action item]
+2. [Specific action item]
+3. [Specific action item]
+
+---
+
+### REWRITTEN SUMMARY EXAMPLE
+> [Write an improved professional summary]`,
+
+    cover: `Write a professional cover letter based on this CV:
+
+# Cover Letter
+
+**[Full Name]**
+[Email] | [Phone] | [Location]
+
+---
+
+Dear Hiring Manager,
+
+[Paragraph 1 — Strong opening. State the role you are applying for, years of experience, and your single biggest value proposition.]
+
+[Paragraph 2 — 2-3 specific achievements from the CV with numbers/percentages that prove you can deliver results for this employer.]
+
+[Paragraph 3 — Express genuine interest in the company, your availability, and a clear call to action for an interview.]
+
+Yours sincerely,
+**[Full Name]**`,
+
+    linkedin: `Create an optimized LinkedIn profile from this CV:
+
+## LINKEDIN HEADLINE
+[Compelling 120-character headline with keywords | value proposition]
+
+---
+
+## ABOUT SECTION
+[Paragraph 1 — Who you are, years of experience, core expertise]
+
+[Paragraph 2 — 2-3 quantified achievements that demonstrate impact]
+
+[Paragraph 3 — What you bring to employers and what opportunities you seek]
+
+---
+
+## EXPERIENCE BULLETS (LinkedIn style)
+
+### [Job Title] — [Company]
+- [Achievement with keyword and metric]
+- [Achievement with keyword and metric]
+
+---
+
+## RECOMMENDED SKILLS TO ADD
+[skill 1], [skill 2], [skill 3], [skill 4], [skill 5], [skill 6], [skill 7], [skill 8]
+
+---
+
+## PROFILE OPTIMIZATION TIPS
+- [Tip 1]
+- [Tip 2]
+- [Tip 3]`
   };
   const prompt = prompts[action] + (jobDesc ? '\n\nTarget Role/JD: ' + jobDesc : '') + '\n\nFormat output clearly with section headers.';
   
@@ -991,20 +1161,40 @@ async function analyzeUploadedCV() {
     document.getElementById('result-view').style.display = 'block';
     
 function mdToHtml(md){
+  if(!md) return '';
   let h = md
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/═+\s*(.+?)\s*═+/g,'<h2>$1</h2>')
+    // Headings
     .replace(/^### (.+)$/gm,'<h3>$1</h3>')
     .replace(/^## (.+)$/gm,'<h2>$1</h2>')
     .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    // Bold + italic combos
+    .replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>')
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    // Blockquote
+    .replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>')
+    // Tables
+    .replace(/^\|[-:| ]+\|$/gm,'__TABLE_DIVIDER__')
+    .replace(/^\| (.+) \|$/gm,(m,p)=>'<tr>'+p.split(' | ').map(c=>'<td>'+c.trim()+'</td>').join('')+'</tr>')
+    .replace(/__TABLE_DIVIDER__\n/g,'')
+    .replace(/(<tr>[\s\S]+?<\/tr>)/g,(m)=>{
+      const rows=m.match(/<tr>[\s\S]+?<\/tr>/g)||[];
+      return '<table>'+rows.join('')+'</table>';
+    })
+    // HR
     .replace(/^---+$/gm,'<hr>')
-    .replace(/^- (.+)$/gm,'<li>$1</li>')
-    .replace(/(<li>[\s\S]*?<\/li>)/g,'<ul>$1</ul>')
-    .replace(/^\| (.+) \|$/gm,(m,p)=>'<tr>'+p.split(' | ').map(c=>'<td>'+c+'</td>').join('')+'</tr>')
-    .replace(/^\|[-| ]+\|$/gm,'');
-  h = h.split('\n\n').map(p=>p.trim()).filter(Boolean).map(p=>p.startsWith('<')?p:'<p>'+p+'</p>').join('\n');
+    // Lists
+    .replace(/^- (.+)$/gm,'<li>$1</li>');
+  // Wrap consecutive <li> in <ul>
+  h = h.replace(/(<li>.*\n?)+/g, m => '<ul>'+m+'</ul>');
+  // Paragraphs
+  h = h.split('\n\n').map(p=>{
+    p = p.trim();
+    if(!p) return '';
+    if(p.startsWith('<')) return p;
+    return '<p>'+p.replace(/\n/g,'<br>')+'</p>';
+  }).filter(Boolean).join('\n');
   return h;
 }
 
@@ -1190,22 +1380,56 @@ CERTIFICATIONS: ${data.certs || 'None'}
 USER'S SUMMARY/NOTES: ${data.summary || 'Generate a compelling professional summary'}
 TARGET KEYWORDS/JD: ${data.keywords || 'General professional role'}
 
-INSTRUCTIONS:
-1. Write a COMPLETE, ready-to-use ${typeLabels[data.type]}
-2. Use powerful action verbs and quantified achievements where possible
-3. Make it ATS-friendly with relevant keywords from the target role
-4. Write a compelling 3-4 line Professional Summary at the top
-5. Expand bullet points from the brief notes into professional achievement statements
-6. Format clearly with section headers in CAPS followed by a line
-7. Keep it concise but impactful — 1 to 1.5 pages worth of content
-8. If cover letter type: write a 3-paragraph professional cover letter
+OUTPUT FORMAT — Use this exact Markdown structure:
 
-Start directly with the CV content. Use plain text formatting with section headers like:
-═══ PROFESSIONAL SUMMARY ═══
-═══ WORK EXPERIENCE ═══
-═══ EDUCATION ═══
-═══ SKILLS ═══
-etc.`;
+# [Full Name]
+**[Target Job Title]**
+Email: [email] | Phone: [phone] | Location: [location]
+
+---
+
+## PROFESSIONAL SUMMARY
+[3-4 powerful sentences. Action verbs. Quantified results.]
+
+---
+
+## CORE COMPETENCIES
+**[Skill]** | **[Skill]** | **[Skill]** | **[Skill]** | **[Skill]** | **[Skill]**
+
+---
+
+## PROFESSIONAL EXPERIENCE
+
+### [Job Title]
+**[Company Name]** | [Location] | *[Start Date] — [End Date]*
+
+- [Power verb + quantified achievement e.g. "Increased sales by 35%"]
+- [Power verb + specific result]
+- [Power verb + achievement]
+
+---
+
+## EDUCATION
+**[Degree/Qualification]** — [Institution] | [Year]
+
+---
+
+## SKILLS
+**Technical Skills:** [skill], [skill], [skill]
+**Languages:** [Language (Level)], [Language (Level)]
+**Certifications:** [cert], [cert]
+
+---
+
+*References available upon request*
+
+STRICT RULES:
+- Always start with # [Full Name] — zero intro text before it
+- Use strong action verbs: Led, Managed, Delivered, Optimized, Achieved, Increased, Reduced
+- Quantify every achievement possible (%, numbers, team sizes, revenue amounts)
+- Cover Letter type: write 3 professional paragraphs in letter format only
+- Europass type: follow EU standard section order
+- Never write placeholder text like "Not specified" — skip empty fields`;
 
   try {
     const response = await fetch('/api/generate', {
