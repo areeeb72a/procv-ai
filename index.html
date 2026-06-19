@@ -890,7 +890,7 @@
         <button class="btn-unlock" onclick="tryUnlock()">🔓 Unlock</button>
       </div>
     </div>
-    <button class="btn-clean-dl" id="cleanDlBtn" onclick="downloadClean()">⬇️ Download Clean PDF</button>
+    <button class="btn-clean-dl" id="cleanDlBtn" onclick="downloadClean()">⬇️ Download Clean Word File</button>
     </div>
   </div>
 
@@ -1542,13 +1542,88 @@ async function tryUnlock() {
   btn.disabled = false;
 }
 
-function downloadClean() {
+let lastCVData = null; // stores structured data for docx generation
+
+async function downloadClean() {
   if (!isUnlocked) return;
-  document.getElementById('wmOverlay').style.display = 'none';
-  window.print();
-  setTimeout(() => {
-    if (!isUnlocked) document.getElementById('wmOverlay').style.display = 'flex';
-  }, 1000);
+  const btn = document.getElementById('cleanDlBtn');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Preparing Word file...';
+  btn.disabled = true;
+
+  try {
+    // Ask AI to convert the CV text into structured JSON for Word generation
+    const structurePrompt = `Convert this CV text into a JSON object with this EXACT structure (no markdown, no explanation, ONLY valid JSON):
+{
+  "name": "Full Name",
+  "title": "Job title line",
+  "email": "email or empty string",
+  "phone": "phone or empty string",
+  "location": "location or empty string",
+  "summary": "professional summary paragraph",
+  "skillsLeftLabel": "TECHNICAL SKILLS",
+  "skillsLeft": ["skill1","skill2","skill3","skill4","skill5","skill6"],
+  "skillsRightLabel": "LEADERSHIP & SOFT SKILLS",
+  "skillsRight": ["skill1","skill2","skill3","skill4","skill5","skill6"],
+  "experience": [{"title":"Job Title","company":"Company","location":"City, Country","dates":"Month Year – Month Year","bullets":["achievement 1","achievement 2"]}],
+  "earlyCareer": [{"role":"Role","org":"Organization","period":"dates"}],
+  "earlyCareerNote": "optional one-line note or empty string",
+  "education": [{"degree":"Degree","institution":"Institution","year":"Year"}],
+  "languages": ["Language — Level","Language — Level"],
+  "certifications": ["cert1","cert2"]
+}
+
+CV TEXT TO CONVERT:
+${cvRawText}
+
+Output ONLY the JSON object, nothing else. No markdown code blocks, no backticks, just raw JSON starting with { and ending with }.`;
+
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2500,
+        system: 'You output ONLY valid JSON. No markdown, no code blocks, no explanation text. Just the raw JSON object.',
+        messages: [{ role: 'user', content: structurePrompt }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || data.error);
+    let jsonText = data.content?.map(c => c.text || '').join('') || '';
+    jsonText = jsonText.trim().replace(/^\u0060\u0060\u0060json\s*/i, '').replace(/^\u0060\u0060\u0060\s*/, '').replace(/\u0060\u0060\u0060\s*$/, '');
+
+    const cvStructured = JSON.parse(jsonText);
+    lastCVData = cvStructured;
+
+    // Now request the actual docx file
+    const docxRes = await fetch('/api/docx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cvStructured)
+    });
+
+    if (!docxRes.ok) {
+      const errData = await docxRes.json().catch(() => ({}));
+      throw new Error(errData.error || 'Failed to generate Word file');
+    }
+
+    const blob = await docxRes.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (cvStructured.name || 'CV').replace(/[^a-zA-Z0-9]/g, '_') + '_CV.docx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('✓ Word file downloaded!');
+  } catch (err) {
+    showToast('❌ Error: ' + err.message);
+  }
+  btn.textContent = origText;
+  btn.disabled = false;
 }
 
 function showToast(msg) {
