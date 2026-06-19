@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ProCV AI — Build Your Career-Winning CV</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0D1B2A">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -492,7 +496,7 @@
 
   /* MODE TABS */
   .mode-tabs { max-width:860px; margin:-32px auto 0; padding:0 20px; position:relative; z-index:20; display:flex; }
-  .mode-tab { flex:1; padding:13px 20px; text-align:center; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); border:none; cursor:pointer; color:rgba(255,255,255,0.75); font-family:'Inter',sans-serif; font-size:0.88rem; font-weight:500; transition:all 0.2s; }
+  .mode-tab { flex:1; padding:13px 20px; text-align:center; background:rgba(255,255,255,0.12); border:none; cursor:pointer; color:rgba(255,255,255,0.85); font-family:'Inter',sans-serif; font-size:0.88rem; font-weight:500; transition:all 0.2s; }
   .mode-tab:first-child { border-radius:12px 0 0 0; }
   .mode-tab:last-child { border-radius:0 12px 0 0; }
   .mode-tab.active { background:var(--white); color:var(--navy); font-weight:700; }
@@ -601,6 +605,24 @@
     .watermark-overlay { display: var(--wm-print, flex) !important; }
   }
 
+
+  .app-footer {
+    text-align: center;
+    padding: 24px 20px 32px;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.78rem;
+    background: var(--navy);
+  }
+  .app-footer .brand-name {
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .app-footer .dev-credit {
+    margin-top: 4px;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.25);
+  }
+
 </style>
 </head>
 <body>
@@ -657,6 +679,7 @@
         <label>What should AI do?</label>
         <select id="uploadAction">
           <option value="improve">✨ Improve & Rewrite for ATS</option>
+          <option value="executive">👔 Rewrite for Executive Role</option>
           <option value="europass">🇪🇺 Convert to Europass Format</option>
           <option value="review">🔍 Review & Give Detailed Feedback</option>
           <option value="cover">✉️ Generate Cover Letter from this CV</option>
@@ -896,6 +919,11 @@
 
 </div><!-- end main -->
 
+<div class="app-footer">
+  Powered by <span class="brand-name">Rizwan's AI Agency</span>
+  <div class="dev-credit">Developed by Syed Rizwan Ahmed</div>
+</div>
+
 <div class="copy-toast" id="copyToast">✓ Copied to clipboard!</div>
 
 <script>
@@ -954,6 +982,50 @@ async function analyzeUploadedCV() {
   const action = document.getElementById('uploadAction').value;
   const jobDesc = document.getElementById('uploadJobDesc').value;
   const prompts = {
+    executive: `You are an executive CV writer specializing in C-suite and senior leadership positions. COMPLETELY REWRITE this CV for an EXECUTIVE-LEVEL audience using this EXACT Markdown format:
+
+# [Full Name]
+**[Executive Title]**
+Email: [email] | Phone: [phone] | Location: [location]
+
+---
+
+## EXECUTIVE SUMMARY
+[3-4 powerful sentences emphasizing leadership scope, strategic impact, P&L responsibility, team size led, and career-defining achievements]
+
+---
+
+## CORE LEADERSHIP COMPETENCIES
+**[Strategic Skill]** | **[Strategic Skill]** | **[Strategic Skill]** | **[Strategic Skill]** | **[Strategic Skill]** | **[Strategic Skill]**
+
+---
+
+## PROFESSIONAL EXPERIENCE
+
+### [Executive Job Title]
+**[Company]** | [Location] | *[Start Date] – [End Date]*
+
+- [Strategic achievement with business impact and quantified result]
+- [Leadership achievement - team size, budget managed, revenue impact]
+- [Transformation/growth achievement with measurable outcome]
+
+---
+
+## EDUCATION
+**[Degree]** — [Institution] | [Year]
+
+---
+
+## KEY ACHIEVEMENTS
+- [Top-level career highlight]
+- [Top-level career highlight]
+
+---
+
+*References available upon request*
+
+RULES: Emphasize strategic leadership over task execution. Highlight P&L, team size, revenue/cost impact, transformation results. Remove CNIC/DOB/Religion/Gender. Start with # [Name].`,
+
     improve: `You are a senior CV writer. COMPLETELY REWRITE this CV using this EXACT Markdown format:
 
 # [Full Name]
