@@ -591,7 +591,7 @@
   /* PRINT STYLES */
   @media print {
     header, .hero, .mode-tabs, .progress-wrap, .result-header,
-    .unlock-box, .copy-toast, #generating-view { display: none !important; }
+    .unlock-box, .copy-toast, #generating-view, #cleanDlBtn { display: none !important; }
     .main { margin: 0; padding: 0; max-width: 100%; }
     #result-view { display: block !important; box-shadow: none; padding: 0; }
     .cv-output { max-height: none; border: none; padding: 20px; font-size: 11pt; line-height: 1.7; }
@@ -1152,7 +1152,9 @@ Yours sincerely,
     const res = await fetch('/api/generate', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6', max_tokens:2000, messages:[{role:'user', content:msgContent}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6', max_tokens:2000,
+      system: 'You are a professional CV writer. ALWAYS use clean Markdown formatting with # for name, ## for sections, ### for job titles, **bold** for companies, *italic* for dates, and - for bullets. NEVER use spaced letters like P R O F E S S I O N A L. NEVER include notes about ATS optimization at the end. Output ONLY the CV content.',
+      messages:[{role:'user', content:msgContent}]})
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
@@ -1162,6 +1164,12 @@ Yours sincerely,
     
 function mdToHtml(md){
   if(!md) return '';
+  // Pre-process: fix spaced headers like "P R O F E S S I O N A L"
+  md = md.replace(/([A-Z] ){3,}[A-Z]/g, m => m.replace(/ /g,''));
+  // Remove ATS notes sections
+  md = md.replace(/ATS OPTIMIZATION NOTES[\s\S]*$/i, '');
+  md = md.replace(/\u2b07\ufe0f.*$/m, ''); // Remove download button text
+
   let h = md
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     // Headings
@@ -1437,7 +1445,8 @@ STRICT RULES:
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1800,
+        max_tokens: 2000,
+        system: 'You are a professional CV writer. ALWAYS format using clean Markdown: # for name heading, ## for section headers, ### for job titles, **bold** for emphasis, *italic* for dates, - for bullet points. NEVER use spaced letters like P R O F E S S I O N A L S U M M A R Y. NEVER add ATS notes at the end. Output ONLY the CV.',
         messages: [{ role: 'user', content: prompt }]
       })
     });
