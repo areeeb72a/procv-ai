@@ -150,7 +150,7 @@
     border-radius: 16px 16px 0 0;
     padding: 24px 36px 0;
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    margin-top: 16px;
+    margin-top: 20px;
   }
   .steps {
     display: flex;
@@ -165,14 +165,7 @@
     position: relative;
   }
   .step:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 14px;
-    left: 36px;
-    right: 0;
-    height: 2px;
-    background: var(--border);
-    z-index: 0;
+    display: none;
   }
   .step.done:not(:last-child)::after { background: var(--gold); }
   .step-circle {
@@ -496,10 +489,11 @@
   }
 
   /* MODE TABS */
-  .mode-tabs { max-width:860px; margin:24px auto 0; padding:0 20px; position:relative; z-index:5; display:flex; gap:10px; }
-  .mode-tab { flex:1; padding:14px 20px; text-align:center; background:rgba(255,255,255,0.1); border:1.5px solid rgba(255,255,255,0.18); border-radius:12px; cursor:pointer; color:rgba(255,255,255,0.85); font-family:'Inter',sans-serif; font-size:0.88rem; font-weight:500; transition:all 0.2s; }
-  .mode-tab:hover { background:rgba(255,255,255,0.18); color:#fff; }
-  .mode-tab.active { background:var(--white); color:var(--navy); font-weight:700; border-color:var(--white); box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+  .mode-tabs { max-width:860px; margin:24px auto 0; padding:0 20px; position:relative; z-index:5; display:flex; gap:12px; }
+  .mode-tab { flex:1; padding:14px 20px; text-align:center; background:var(--white); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; color:var(--muted); font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+  .mode-tab:hover { border-color:var(--gold); color:var(--navy); }
+  .mode-tab.active { background:var(--navy); color:var(--white); font-weight:700; border-color:var(--navy); box-shadow:0 2px 6px rgba(13,27,42,0.18); }
+  .mode-tab.active .tab-icon { filter:none; }
 
   /* UPLOAD CARD */
   .upload-card { background:var(--white); border-radius:16px; padding:36px; box-shadow:0 4px 30px rgba(0,0,0,0.08); margin-top:16px; }
@@ -901,7 +895,7 @@
         <div class="unlock-title">🔒 Clean PDF chahiye? Unlock karo!</div>
         <div class="unlock-sub">
           Pay karo aur WhatsApp pe unlock code lो — watermark-free PDF download hogi<br>
-          💰 <strong style="color:#C9A84C">PKR 500</strong> &nbsp;|&nbsp; <strong style="color:#C9A84C">AED 10</strong>
+          💰 <strong style="color:#C9A84C">PKR 2000</strong> &nbsp;|&nbsp; <strong style="color:#C9A84C">AED 25</strong>
         </div>
       </div>
       <div class="unlock-right">
@@ -1570,7 +1564,7 @@ function buildWatermark() {
 
 function setWALink() {
   const text = encodeURIComponent(
-    'Assalam o Alaikum! Me ne ProCV AI se apni CV banai hai. Clean PDF chahiye.\n\nKindly payment details bhejein:\n🇵🇰 PKR 500 | 🇦🇪 AED 10'
+    'Assalam o Alaikum! Me ne ProCV AI se apni CV banai hai. Clean PDF chahiye.\n\nKindly payment details bhejein:\n🇵🇰 PKR 2000 | 🇦🇪 AED 25'
   );
   const pkBtn = document.getElementById('waBtn');
   if (pkBtn) pkBtn.href = 'https://wa.me/923341331972?text=' + text;
