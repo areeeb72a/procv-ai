@@ -1198,7 +1198,7 @@ Yours sincerely,
   // Hide upload, show generating
   document.getElementById('uploadMode').classList.remove('active');
   document.getElementById('generating-view').style.display = 'block';
-  window.scrollTo({top:0, behavior:'smooth'});
+  document.getElementById('generating-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   try {
     let msgContent = [];
@@ -1306,7 +1306,8 @@ function goStep(n) {
     document.getElementById('step' + n).classList.add('active');
     document.getElementById('s' + n).classList.add('active');
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const formModeEl = document.getElementById('formMode');
+  if (formModeEl) formModeEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── SKILLS ──
