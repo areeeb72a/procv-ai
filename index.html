@@ -414,18 +414,7 @@
     color: var(--navy);
   }
   .result-actions { display: flex; gap: 10px; }
-  .cv-output {
-    background: #FAFAFA;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 32px;
-    font-size: 0.88rem;
-    line-height: 1.8;
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    max-height: 560px;
-    overflow-y: auto;
-  }
+    /* (cv-output base styles defined later in the stylesheet — see professional CV output section) */
   .cv-output h2 {
     font-family: 'Playfair Display', serif;
     font-size: 1.5rem;
@@ -486,6 +475,8 @@
     .cv-types { grid-template-columns: 1fr; }
     .steps { gap: 4px; }
     .step-label { display: none; }
+    .mode-tabs { padding: 0 12px; gap: 8px; }
+    .mode-tab { padding: 12px 8px; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   }
 
   /* MODE TABS */
@@ -493,7 +484,6 @@
   .mode-tab { flex:1; padding:14px 20px; text-align:center; background:var(--white); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; color:var(--muted); font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
   .mode-tab:hover { border-color:var(--gold); color:var(--navy); }
   .mode-tab.active { background:var(--navy); color:var(--white); font-weight:700; border-color:var(--navy); box-shadow:0 2px 6px rgba(13,27,42,0.18); }
-  .mode-tab.active .tab-icon { filter:none; }
 
   /* UPLOAD CARD */
   .upload-card { background:var(--white); border-radius:16px; padding:36px; box-shadow:0 4px 30px rgba(0,0,0,0.08); margin-top:16px; }
@@ -684,7 +674,7 @@
       </div>
       <div class="btn-row">
         <div style="font-size:0.78rem;color:var(--muted);">🔒 File stays in your browser only</div>
-        <button class="btn btn-primary" onclick="analyzeUploadedCV()">✦ Analyze & Improve</button>
+        <button class="btn btn-primary" onclick="analyzeUploadedCV()" id="analyzeBtn">✦ Analyze & Improve</button>
       </div>
     </div>
   </div>
@@ -926,6 +916,9 @@
 let cvType = 'ats';
 let skills = [];
 let experiences = [];
+let uploadedFileData = null;
+let cvRawText = '';
+let isUnlocked = false;
 
 
 // ── MODE SWITCH ──
@@ -940,7 +933,6 @@ function switchMode(mode) {
 }
 
 // ── FILE UPLOAD ──
-let uploadedFileData = null;
 function dragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
 function dragLeave() { document.getElementById('dropZone').classList.remove('drag-over'); }
 function dropFile(e) { e.preventDefault(); document.getElementById('dropZone').classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) processFile(f); }
@@ -973,6 +965,10 @@ function processFile(file) {
 // ── ANALYZE UPLOADED CV ──
 async function analyzeUploadedCV() {
   if (!uploadedFileData) { alert('Please upload a CV file first.'); return; }
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  if (analyzeBtn && analyzeBtn.disabled) return;
+  if (analyzeBtn) analyzeBtn.disabled = true;
+  isUnlocked = false;
   const action = document.getElementById('uploadAction').value;
   const jobDesc = document.getElementById('uploadJobDesc').value;
   const prompts = {
@@ -1279,6 +1275,7 @@ function mdToHtml(md){
   } catch(err) {
     document.getElementById('generating-view').style.display = 'none';
     document.getElementById('uploadMode').classList.add('active');
+    if (analyzeBtn) analyzeBtn.disabled = false;
     alert('Error: ' + err.message);
   }
 }
@@ -1375,11 +1372,17 @@ function removeExp(id) {
 
 // ── GENERATE ──
 async function generateCV() {
+  const genBtn = document.getElementById('generateBtn');
+  if (genBtn && genBtn.disabled) return; // already submitting, ignore extra clicks
+  if (genBtn) genBtn.disabled = true;
+
+  isUnlocked = false;
   const name = document.getElementById('fullName').value.trim();
   const title = document.getElementById('jobTitle').value.trim();
   if (!name || !title) {
     alert('Please fill in your name and target job title first (Step 2).');
     goStep(2);
+    if (genBtn) genBtn.disabled = false;
     return;
   }
 
@@ -1522,7 +1525,10 @@ STRICT RULES:
 
     document.getElementById('generating-view').style.display = 'none';
     document.getElementById('result-view').style.display = 'block';
-    document.getElementById('cvOutput').innerText = cvText;
+    document.getElementById('cvOutput').innerHTML = mdToHtml(cvText);
+    cvRawText = cvText;
+    buildWatermark();
+    setWALink();
 
     // Mark step 5 done
     document.querySelectorAll('.step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
@@ -1530,6 +1536,7 @@ STRICT RULES:
   } catch (err) {
     document.getElementById('generating-view').style.display = 'none';
     document.getElementById('step4').classList.add('active');
+    if (genBtn) genBtn.disabled = false;
     alert('Error: ' + err.message);
   }
 }
@@ -1537,9 +1544,6 @@ STRICT RULES:
 
 // ── WATERMARK & UNLOCK SYSTEM ──
 // Codes verified via API (one-time use)
-
-let cvRawText = '';
-let isUnlocked = false;
 
 function buildWatermark() {
   const overlay = document.getElementById('wmOverlay');
@@ -1660,7 +1664,18 @@ Output ONLY the JSON object, nothing else. No markdown code blocks, no backticks
     let jsonText = data.content?.map(c => c.text || '').join('') || '';
     jsonText = jsonText.trim().replace(/^\u0060\u0060\u0060json\s*/i, '').replace(/^\u0060\u0060\u0060\s*/, '').replace(/\u0060\u0060\u0060\s*$/, '');
 
-    const cvStructured = JSON.parse(jsonText);
+    let cvStructured;
+    try {
+      cvStructured = JSON.parse(jsonText);
+    } catch (parseErr) {
+      // Fallback: try to extract just the {...} portion in case AI added extra text
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cvStructured = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Could not format the Word document. Please try again.');
+      }
+    }
     lastCVData = cvStructured;
 
     // Now request the actual docx file
@@ -1698,17 +1713,25 @@ function showToast(msg) {
   if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
 }
 
-// Override copyCV to store raw text
-const _origCopyCV = typeof copyCV !== 'undefined' ? copyCV : null;
-function copyCV() {
-  navigator.clipboard.writeText(cvRawText || document.getElementById('cvOutput').innerText);
-  showToast('✓ Copied to clipboard!');
-}
-
 // ── COPY ──
 function copyCV() {
-  const text = document.getElementById('cvOutput').innerText;
-  navigator.clipboard.writeText(text);
+  const rawText = cvRawText || document.getElementById('cvOutput').innerText;
+  let textToCopy = rawText;
+
+  if (!isUnlocked) {
+    textToCopy =
+      '═══════════════════════════════\n' +
+      '   SAMPLE PREVIEW — Rizwan\'s AI Agency\n' +
+      '═══════════════════════════════\n\n' +
+      rawText +
+      '\n\n═══════════════════════════════\n' +
+      '   Unlock the full clean version:\n' +
+      '   WhatsApp: +92-334-1331972 (PK) | +971-54-5271033 (UAE)\n' +
+      '   ProCV AI — procv-ai.vercel.app\n' +
+      '═══════════════════════════════';
+  }
+
+  navigator.clipboard.writeText(textToCopy);
   const toast = document.getElementById('copyToast');
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2500);
@@ -1718,10 +1741,23 @@ function copyCV() {
 function startOver() {
   skills = [];
   experiences = [];
+  cvRawText = '';
+  isUnlocked = false;
+  uploadedFileData = null;
   document.getElementById('exp-list').innerHTML = '';
   document.getElementById('result-view').style.display = 'none';
+  document.getElementById('generating-view').style.display = 'none';
+  const genBtn = document.getElementById('generateBtn');
+  if (genBtn) genBtn.disabled = false;
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  if (analyzeBtn) analyzeBtn.disabled = false;
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active', 'done'));
   document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+  removeFile();
+  const cleanBtn = document.getElementById('cleanDlBtn');
+  if (cleanBtn) cleanBtn.style.display = 'none';
+  const unlockInp = document.getElementById('unlockCode');
+  if (unlockInp) { unlockInp.value = ''; unlockInp.placeholder = 'ENTER CODE'; unlockInp.style.borderColor = '#C9A84C'; }
   goStep(1);
   document.querySelectorAll('.cv-type').forEach(e => e.classList.remove('selected'));
   document.querySelector('[data-type="ats"]').classList.add('selected');

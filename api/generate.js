@@ -9,6 +9,29 @@ export default async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API key not configured on server' });
 
+  // ── ABUSE PREVENTION ──
+  // Only allow this specific app's model and cap token usage.
+  // This endpoint is public-facing, so we never trust the caller's values directly.
+  const ALLOWED_MODEL = 'claude-sonnet-4-6';
+  const MAX_ALLOWED_TOKENS = 3000;
+
+  const body = req.body || {};
+  if (!Array.isArray(body.messages) || body.messages.length === 0) {
+    return res.status(400).json({ error: 'Invalid request: messages required' });
+  }
+  if (body.messages.length > 1) {
+    return res.status(400).json({ error: 'Invalid request: only single-turn requests allowed' });
+  }
+
+  const safeBody = {
+    model: ALLOWED_MODEL,
+    max_tokens: Math.min(Number(body.max_tokens) || 1500, MAX_ALLOWED_TOKENS),
+    messages: body.messages
+  };
+  if (body.system && typeof body.system === 'string') {
+    safeBody.system = body.system.slice(0, 3000); // cap system prompt length too
+  }
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -17,7 +40,7 @@ export default async function handler(req, res) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(safeBody)
     });
 
     const data = await response.json();

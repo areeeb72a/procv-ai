@@ -188,9 +188,35 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // ── ABUSE PREVENTION: cap array sizes and string lengths ──
+  const MAX_ARRAY_ITEMS = 25;
+  const MAX_STRING_LEN = 2000;
+
+  function capString(s) {
+    return typeof s === 'string' ? s.slice(0, MAX_STRING_LEN) : s;
+  }
+  function capArray(arr) {
+    return Array.isArray(arr) ? arr.slice(0, MAX_ARRAY_ITEMS) : arr;
+  }
+
   try {
     const cv = req.body;
     if (!cv || !cv.name) return res.status(400).json({ error: 'Missing CV data' });
+
+    // Sanitize and cap sizes to prevent abuse
+    cv.name = capString(cv.name);
+    cv.title = capString(cv.title);
+    cv.summary = capString(cv.summary);
+    cv.experience = capArray(cv.experience)?.map(job => ({
+      ...job,
+      bullets: capArray(job.bullets)?.map(capString)
+    }));
+    cv.earlyCareer = capArray(cv.earlyCareer);
+    cv.education = capArray(cv.education);
+    cv.languages = capArray(cv.languages);
+    cv.certifications = capArray(cv.certifications);
+    cv.skillsLeft = capArray(cv.skillsLeft);
+    cv.skillsRight = capArray(cv.skillsRight);
 
     const doc = buildDoc(cv);
     const buffer = await Packer.toBuffer(doc);
