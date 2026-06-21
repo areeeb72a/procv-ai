@@ -232,6 +232,11 @@
     letter-spacing: 0.5px;
     text-transform: uppercase;
   }
+  .required-mark {
+    color: #EF4444;
+    font-weight: 700;
+    margin-left: 2px;
+  }
   input, textarea, select {
     border: 1.5px solid var(--border);
     border-radius: 8px;
@@ -621,7 +626,7 @@
   <h1>Your CV, <em>Crafted</em><br>by AI Intelligence</h1>
   <p>ATS-compatible CVs, Europass format, and cover letters — generated in seconds, tailored for your dream role.</p>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-num">3x</div><div class="stat-label">More Interviews</div></div>
+    <div class="stat"><div class="stat-num">AI</div><div class="stat-label">Powered Writing</div></div>
     <div class="stat"><div class="stat-num">60s</div><div class="stat-label">Generation Time</div></div>
     <div class="stat"><div class="stat-num">ATS</div><div class="stat-label">Compatible</div></div>
   </div>
@@ -754,14 +759,14 @@
   <!-- STEP 2: Personal Info -->
   <div class="card" id="step2">
     <div class="card-title">Tell us about yourself</div>
-    <div class="card-sub">Your professional identity</div>
+    <div class="card-sub">Your professional identity &nbsp;•&nbsp; <span class="required-mark">*</span> required</div>
     <div class="form-grid">
       <div class="form-group">
-        <label>Full Name</label>
+        <label>Full Name <span class="required-mark">*</span></label>
         <input type="text" id="fullName" placeholder="e.g. Ahmed Ali Khan">
       </div>
       <div class="form-group">
-        <label>Target Job Title</label>
+        <label>Target Job Title <span class="required-mark">*</span></label>
         <input type="text" id="jobTitle" placeholder="e.g. Digital Marketing Manager">
       </div>
       <div class="form-group">
